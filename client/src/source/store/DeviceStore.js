@@ -2,26 +2,14 @@ import {makeAutoObservable} from 'mobx';
 
 export default class DeviceStore {
   constructor() {
-    this._types = [
-      {id: 1, name: 'Компьютер'},
-      {id: 2, name: 'Ноутбук'},
-    ];
-    this._brands = [
-      {id: 1, name: 'AMD'},
-      {id: 2, name: 'Intel'},
-    ];
-    this._devices = [
-      { id: 1, name: 'Комп 1', price: 20000, rating: 5, img: 'https://www.theitbuffs.com/image/cache/catalog/Products/Dell%20Bundle/41x81v5aR8L._AC_-498x337.jpg' },
-      { id: 2, name: 'Комп 2', price: 20000, rating: 5, img: 'https://www.theitbuffs.com/image/cache/catalog/Products/Dell%20Bundle/41x81v5aR8L._AC_-498x337.jpg' },
-      { id: 3, name: 'Комп 3', price: 20000, rating: 5, img: 'https://www.theitbuffs.com/image/cache/catalog/Products/Dell%20Bundle/41x81v5aR8L._AC_-498x337.jpg' },
-      { id: 4, name: 'Комп 4', price: 20000, rating: 5, img: 'https://www.theitbuffs.com/image/cache/catalog/Products/Dell%20Bundle/41x81v5aR8L._AC_-498x337.jpg' },
-      { id: 5, name: 'Комп 4', price: 20000, rating: 5, img: 'https://www.theitbuffs.com/image/cache/catalog/Products/Dell%20Bundle/41x81v5aR8L._AC_-498x337.jpg' },
-      { id: 6, name: 'Комп 4', price: 20000, rating: 5, img: 'https://www.theitbuffs.com/image/cache/catalog/Products/Dell%20Bundle/41x81v5aR8L._AC_-498x337.jpg' },
-      { id: 7, name: 'Комп 4', price: 20000, rating: 5, img: 'https://www.theitbuffs.com/image/cache/catalog/Products/Dell%20Bundle/41x81v5aR8L._AC_-498x337.jpg' },
-      { id: 8, name: 'Комп 4', price: 20000, rating: 5, img: 'https://www.theitbuffs.com/image/cache/catalog/Products/Dell%20Bundle/41x81v5aR8L._AC_-498x337.jpg' },
-    ];
+    this._types = [];
+    this._brands = [];
+    this._devices = [];
     this._selectedType = {};
     this._selectedBrand = {};
+    this._page = 1;
+    this._totalCount = 0;
+    this._limit = 3;
 
     makeAutoObservable(this);
   }
@@ -39,11 +27,25 @@ export default class DeviceStore {
   }
 
   setSelectedType(type) {
+    this.setPage(1);
     this._selectedType = type;
   }
 
   setSelectedBrand(brand) {
+    this.setPage(1);
     this._selectedBrand = brand;
+  }
+
+  setPage(page) {
+    this._page = page;
+  }
+
+  setTotalCount(totalCount) {
+    this._totalCount = totalCount;
+  }
+
+  setLimit(limit) {
+    this._limitt = limit;
   }
 
   get types() {
@@ -64,5 +66,17 @@ export default class DeviceStore {
 
   get selectedBrand() {
     return this._selectedBrand;
+  }
+
+  get page() {
+    return this._page;
+  }
+
+  get totalCount() {
+    return this._totalCount;
+  }
+
+  get limit() {
+    return this._limit;
   }
 };

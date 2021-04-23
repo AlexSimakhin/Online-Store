@@ -1,11 +1,24 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { PropTypes } from 'prop-types';
 import { Button, Col, Dropdown, Form, Modal, Row } from 'react-bootstrap';
 import { Context } from './../../../index';
+import { fetchBrands, fetchTypes } from '../../http/deviceApi';
+import { observer } from 'mobx-react-lite';
+import { createDevice } from './../../http/deviceApi';
 
-const CreateDevice = ({ show, onHide }) => {
+const CreateDevice = observer(({ show, onHide }) => {
   const { device } = useContext(Context);
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState(0);
+  const [file, setFile] = useState(null);
+
   const [info, setInfo] = useState([]);
+
+  useEffect(() => {
+    fetchTypes().then(data => device.setTypes(data));
+    fetchBrands().then(data => device.setBrands(data));
+    // eslint-disable-next-line
+  }, []);
 
   const addInfo = () => {
     setInfo([...info, { title: '', description: '', number: Date.now() }]);
@@ -13,6 +26,26 @@ const CreateDevice = ({ show, onHide }) => {
 
   const removeInfo = (number) => {
     setInfo(info.filter(i => i.number !== number));
+  };
+
+  const changeInfo = (key, value, number) => {
+    setInfo(info.map(i => i.number === number ? { ...i, [key]: value } : i));
+  };
+
+  const selectFile = e => {
+    setFile(e.target.files[0]);
+  };
+
+  const addDevice = () => {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('price', `${price}`);
+    formData.append('img', file);
+    formData.append('typeId', device.selectedType.id);
+    formData.append('brandId', device.selectedBrand.id);
+    formData.append('info', JSON.stringify(info));
+
+    createDevice(formData).then(data => onHide());
   };
 
   return (
@@ -34,19 +67,19 @@ const CreateDevice = ({ show, onHide }) => {
         <Form>
           
           <Dropdown className='mt-3 mb-3'>
-            <Dropdown.Toggle>Выберите тип</Dropdown.Toggle>
+            <Dropdown.Toggle>{device.selectedType.name || 'Выберите тип'}</Dropdown.Toggle>
             <Dropdown.Menu>
               {device.types.map(type =>
-                <Dropdown.Item key={type.id}>{type.name}</Dropdown.Item>
+                <Dropdown.Item onClick={() => device.setSelectedType(type)} key={type.id}>{type.name}</Dropdown.Item>
               )}
             </Dropdown.Menu>
           </Dropdown>
 
           <Dropdown className='mt-3 mb-3'>
-            <Dropdown.Toggle>Выберите бренд</Dropdown.Toggle>
+            <Dropdown.Toggle>{device.selectedBrand.name || 'Выберите бренд'}</Dropdown.Toggle>
             <Dropdown.Menu>
               {device.brands.map(brand =>
-                <Dropdown.Item key={brand.id}>{brand.name}</Dropdown.Item>
+                <Dropdown.Item onClick={() => device.setSelectedBrand(brand)} key={brand.id}>{brand.name}</Dropdown.Item>
               )}
             </Dropdown.Menu>
           </Dropdown>
@@ -54,18 +87,23 @@ const CreateDevice = ({ show, onHide }) => {
           <Form.Control
             className='mt-3'
             placeholder='Введите название устройства'
+            value={name}
+            onChange={e => setName(e.target.value)}
           />
 
           <Form.Control
             className='mt-3'
             placeholder='Введите стоимость устройства'
             type='number'
+            value={price}
+            onChange={e => setPrice(e.target.value)}
           />
 
           <Form.Control
             className='mt-3'
             placeholder='Введите название устройства'
             type='file'
+            onChange={selectFile}
           />
 
           <hr />
@@ -77,12 +115,16 @@ const CreateDevice = ({ show, onHide }) => {
                 <Col md={4}>
                   <Form.Control
                     placeholder='Введите название свойства'
+                    value={i.title}
+                    onChange={e => changeInfo('title', e.target.value, i.number)}
                   />
                 </Col>
 
                 <Col md={4}>
                   <Form.Control
                     placeholder='Введите описание свойства'
+                    value={i.description}
+                    onChange={e => changeInfo('description', e.target.value, i.number)}
                   />
                 </Col>
 
@@ -98,12 +140,12 @@ const CreateDevice = ({ show, onHide }) => {
 
       <Modal.Footer>
         <Button variant='outline-danget' onClick={onHide}>Закрать</Button>
-        <Button variant='outline-success' onClick={onHide}>Добавить</Button>
+        <Button variant='outline-success' onClick={addDevice}>Добавить</Button>
       </Modal.Footer>
       
     </Modal>
   );
-};
+});
 
 CreateDevice.propTypes = {
   show: PropTypes.bool,
