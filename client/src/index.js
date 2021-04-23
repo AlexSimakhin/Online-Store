@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { createContext } from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import UserStore from './source/store/UserStore';
+import DeviceStore from './source/store/DeviceStore';
+
+export const Context = createContext(null);
 
 ReactDOM.render(
-  <App />,
+  <Context.Provider value={{
+    user: new UserStore(),
+    device: new DeviceStore()
+  }}>
+    <App />
+  </Context.Provider>,
   document.getElementById('root')
 );
 
